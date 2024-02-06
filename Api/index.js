@@ -16,7 +16,15 @@ mongoose.connect(process.env.MONGO_URL).then(()=>{
 
 app.use('/api/user',userRouter)
 app.use('/api/auth',authRouter)
-
+app.use((err,req,res,next)=>{
+    const statusCode = err.statusCode || 500;
+    const message = err.message||"Internal Server Error";
+    return res.status(statusCode).json({
+        success:false,
+        message,
+        statusCode,
+    })
+})
 app.listen(PORT,()=>{
     console.log(`Server running at localhost http://localhost:${PORT}`)
 })
