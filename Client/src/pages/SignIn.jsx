@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { signInStart,signInSuccess,signInFailure } from '../redux/user/userSlice'
+import {useDispatch,useSelector} from 'react-redux'
 function SignIn() {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const {loading,error} = useSelector((state)=>state.user)
   const navigate = useNavigate()
-
+  
+  const dispatch =  useDispatch();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,36 +16,37 @@ function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      setLoading(true);
+      dispatch(signInStart());
       const res = await fetch('http://localhost:3000/api/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'credentials': 'include' 
+          'credentials': 'include'
         },
         body: JSON.stringify(formData),
       });
-      
+  
       if (!res.ok) {
-        throw new Error('Sign-in failed');
+        const errorData = await res.json();
+        throw new Error(errorData.error);
       }
-      
+  
       const data = await res.json();
-      if (!data.token) {
+      if (!data.userData || !data.userData.token) {
         throw new Error('Access token not provided');
       }
   
-      document.cookie = `access_token=${data.token}; expires=${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()}; path=/;`;
+      document.cookie = `access_token=${data.userData.token}; expires=${new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()}; path=/;`;
   
-      setLoading(false);
-      setError(false);
-      navigate( '/')
+      dispatch(signInSuccess(data));
+      navigate('/');
     } catch (error) {
-      setLoading(false);
-      setError(true);
+      console.error(error);
+      dispatch(signInFailure(error));
     }
   };
   
+
 
   return (
     <div className='max-w-lg p-3 mx-auto'>
@@ -79,7 +81,7 @@ function SignIn() {
           <span className='text-blue-500'>Sign Up</span>
         </Link>
       </div>
-      <p className='text-red-600'>{error && 'Something went wrong'}</p>
+      <p className='text-red-600'>{error  ? error.message ||  'Something went wrong' : ''}</p>
     </div>
   );
 }
