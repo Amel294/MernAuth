@@ -26,24 +26,34 @@ export const signup = async (req, res, next) => {
 
 
 export const signin = async (req, res, next) => {
-    const { email, password } = req.body
-    console.log(req.body)
-    try {
-        const validUser = await UserModel.findOne({ email })
-        if (!validUser) return next(errorHandler(404, 'User not Found'))
-        const validPassword = bcryptjs.compareSync(password, validUser.password)
-        if (!validPassword) return next(errorHandler(401, 'Wrong Credentials'))
-        const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET)
-    let {password:hashedPassword,...rest} = validUser._doc
-    rest = {token,...rest}
-    const expiryDate = new Date(); // Create a new date object
-    expiryDate.setDate(expiryDate.getDate() + 7); // Set expiry to 7 days from now
+    const { email, password } = req.body;
     
-    res.cookie('access_token', token, { 
+    try {
+      const validUser = await UserModel.findOne({ email });
+      if (!validUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      const validPassword = bcryptjs.compareSync(password, validUser.password);
+      if (!validPassword) {
+        return res.status(401).json({ error: 'Wrong credentials' });
+      }
+  
+      const token = jwt.sign({ _id: validUser._id }, process.env.JWT_SECRET);
+      
+      // Set expiry date for the cookie (e.g., 7 days from now)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 7);
+  
+      res.cookie('access_token', token, {
         httpOnly: true,
-        expires: expiryDate // Set the expiry date for the cookie
-    }).status(200).json(rest);
+        expires: expiryDate,
+        domain: 'localhost', // Replace with your domain
+        path: '/', // Set to root to make the cookie accessible across the entire website
+        secure: false, // Only send the cookie over HTTPS
+      }).status(200).json({ token });
     } catch (error) {
-        next(error)
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-}
+  };
