@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInStart,signInSuccess,signInFailure } from '../redux/user/userSlice'
 import {useDispatch,useSelector} from 'react-redux'
+import OAth from '../components/OAth';
 function SignIn() {
   const [formData, setFormData] = useState({});
   const {loading,error} = useSelector((state)=>state.user)
@@ -74,6 +75,7 @@ function SignIn() {
         >
           {loading ? 'Loading' : 'Sign In'}
         </button>
+        <OAth/>
       </form>
       <div className='flex justify-center gap-2 mt-5'>
         <p>Dont have an Account?</p>

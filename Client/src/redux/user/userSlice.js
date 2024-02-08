@@ -14,19 +14,22 @@ const userSlice = createSlice({
             state.loading=true;
         },
         signInSuccess: (state,action)=>{
-            state.currentUser = action.payload;
+            state.currentUser = action.payload,
             state.loading = false,
             state.error = false
         },
         signInFailure:(state,action)=>{
             state.loading = false,
             state.error = action.payload
+        },
+        changeImage: (state, action) => {
+            state.currentUser.userData.profilePicture = action.payload;
         }
     }
 })
 
 
-export const {signInStart,signInSuccess,signInFailure} = userSlice.actions
+export const {signInStart,signInSuccess,signInFailure,changeImage} = userSlice.actions
 
 
 export default userSlice.reducer

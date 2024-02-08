@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link,useNavigate } from 'react-router-dom'
+import OAth from '../components/OAth'
 function SignUp() {
   const [formData, setFormData] = useState({})
   const [error, setError] = useState(false)
@@ -21,6 +22,7 @@ function SignUp() {
         body: JSON.stringify(formData)
       })
       const data = await res.json()
+      console.log(data)
       setLoading(false)
       if(data.success === false){
         setError(true)
@@ -40,6 +42,7 @@ function SignUp() {
         <input type='email' placeholder='Enter Email' id='email' className='p-3 rounded-lg bg-slate-100' onChange={handleChange}></input>
         <input type='password' placeholder='Enter Password' id='password' className='p-3 rounded-lg bg-slate-100' onChange={handleChange} ></input>
         <button disabled={loading} className="p-3 text-white uppercase rounded-lg bg-slate-700 hover:opacity-95 disabled:opacity-80">{loading ? 'Loading' : 'Sign Up'}</button>
+        <OAth/>
       </form>
       <div className='flex justify-center gap-2 mt-5'>
         <p>Have an account</p>
